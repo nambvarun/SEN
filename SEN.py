@@ -59,4 +59,5 @@ class SEN(object):
 
 
 def inverse(input_sen):
-	return SEN(-np.transpose(input_sen.rotation) * input_sen.translation, np.transpose(input_sen.rotation), is_rotation_matrix=True)
+	return SEN(-np.transpose(input_sen.rotation) * input_sen.translation, np.transpose(input_sen.rotation),
+	           is_rotation_matrix=True)
