@@ -76,29 +76,29 @@ class ExponentialSEN(object):
 				R = np.identity(3)
 				T = v * dt
 			else:
-				R = np.identity(3) + rotation_hat(w) / np.linalg.norm(w) * math.sin(np.linalg.norm(w) * dt) + \
-				         rotation_hat(w) ** 2 / np.linalg.norm(w) ** 2 * (1 - math.cos(np.linalg.norm(w) * dt))
-				T = (np.identity(3) - R) * rotation_hat(w) * np.transpose(v) / np.linalg.norm(w) ** 2 + \
-				         w * np.transpose(w) / np.linalg.norm(w) ** 2 * np.transpose(v) * dt
+				# R = np.identity(3) + rotation_hat(w) / np.linalg.norm(w) * math.sin(np.linalg.norm(w) * dt) + rotation_hat(w) ** 2 / np.linalg.norm(w) ** 2 * (1 - math.cos(np.linalg.norm(w) * dt))
+				# T = (np.identity(3) - R) * rotation_hat(w) * np.transpose(v) / np.linalg.norm(w) ** 2 + w * np.transpose(w) / np.linalg.norm(w) ** 2 * np.transpose(v) * dt
+				print ""
 		else:
 			print "invalid twist coordinates"
 
-		self.sen = SEN(T, R, is_rotation_matrix=True)
+		# self.sen = SEN(T, R, is_rotation_matrix=True)
 
 
 def adjoint(sen, twist):
-	if twist.isclass(SEN):
+	if isinstance(twist, SEN):
 		return sen.g_matrix * twist * inverse(sen.g_matrix)
-	elif sen.isclass(SEN) and sen.se_type == 'SE2':
+	elif isinstance(sen, SEN) and sen.se_type == 'SE2':
 		J = np.matrix('0, 1; -1, 0')
 
 		if np.shape(twist)[0] == 3:
 			return np.row_stack((np.column_stack((sen.rotation, sen.translation)), [0, 0, 1]))
+		# elif np.shape(twsit)
 		elif np.shape(twist)[0] == 2:
 			return sen.rotation * twist
 		else:
 			print "twist has incorrect dimensions for SE2 adjoint operation"
-	elif sen.isclass(SEN) and sen.se_type == 'SE3' and np.shape(twist) == (6, 1):
+	elif isinstance(sen, SEN) and sen.se_type == 'SE3' and np.shape(twist) == (6, 1):
 		quad1 = sen.rotation
 		quad2 = rotation_hat(sen.translation) * sen.rotation
 		quad3 = np.zeros((3, 3))
@@ -106,7 +106,7 @@ def adjoint(sen, twist):
 		final2 = np.concatenate((quad3, quad1), axis=1)
 		return np.row_stack((final1, final2)) * twist
 	else:
-		print "incorrect adjoint param dimensions inputted"
+		print "incorrect adjoint parameter dimensions inputted"
 
 
 def log(sen, dt=1):
@@ -137,6 +137,7 @@ def log(sen, dt=1):
 		else:
 			v = sen.translation / dt
 
-		return np.row_stack(v, omega)
+		return np.row_stack((v, omega))
 	else:
 		print "invalid SEN type inputted into log function"
+
