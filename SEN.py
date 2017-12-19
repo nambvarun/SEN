@@ -3,7 +3,7 @@ import numpy as np
 
 
 """
-Set of classes to handle operations with Special Euclidean 2 and 3 groups.
+Set of classes and helper functions to handle operations with Special Euclidean 2 and 3 groups.
 """
 
 
@@ -146,7 +146,7 @@ class SE3(object):
 			self._mat = np.vstack((rotation, np.matrix('0 0 0')))
 			self._mat = np.hstack((self._mat, np.vstack((translation, np.matrix('1')))))
 		else:
-			self._mat = np.vstack((EulerXYZtoR(rotation[0, 0], rotation[0, 1], rotation[0, 2]), np.matrix('0 0 0')))
+			self._mat = np.vstack((euler_xyz_to_rot(rotation[0, 0], rotation[0, 1], rotation[0, 2]), np.matrix('0 0 0')))
 			self._mat = np.hstack((self._mat, np.vstack((translation, np.matrix('1')))))
 
 	def __mul__(self, other):
@@ -313,7 +313,7 @@ def vec_hat(xi):
 	return np.vstack((r1, r2, r3))
 
 
-def rotX(theta):
+def rot_x(theta):
 	"""
 	Returns a matrix representing a 3D x-axis rotation.
 
@@ -331,7 +331,7 @@ def rotX(theta):
 					 [0, math.sin(theta), math.cos(theta)]])
 
 
-def rotY(theta):
+def rot_y(theta):
 	"""
 	Returns a matrix representing a 3D y-axis rotation.
 
@@ -349,7 +349,7 @@ def rotY(theta):
 					 [-math.sin(theta), 0, math.cos(theta)]])
 
 
-def rotZ(theta):
+def rot_z(theta):
 	"""
 	Returns a matrix representing a 3D z-axis rotation.
 
@@ -367,9 +367,9 @@ def rotZ(theta):
 					 [0, 0, 1]])
 
 
-def EulerXYZtoR(theta_x, theta_y, theta_z):
+def euler_xyz_to_rot(theta_x, theta_y, theta_z):
 	"""
-	Returns a 3D rotation matrix.
+	Converts euler XYZ to a 3D rotation matrix.
 
 	Parameters
 	----------
@@ -385,5 +385,39 @@ def EulerXYZtoR(theta_x, theta_y, theta_z):
 	:return: np.matrix with dimension (3, 3)
 		The 3D rotation matrix as a np.matrix object.
 	"""
-	return rotX(theta_x) * rotY(theta_y) * rotZ(theta_z)
+	return rot_x(theta_x) * rot_y(theta_y) * rot_z(theta_z)
+
+
+def quaternion_to_rot(x, y, z, w):
+	"""
+	Converts a quaternion where q = xi + yj + zk + w to a 3D rotation matrix.
+
+	Parameters
+	----------
+	:param x: float
+		xi component of quaternion.
+	:param y: float
+		yi component of quaternion.
+	:param z: float
+		zi component of quaternion.
+	:param w: float
+		w component of quaternion.
+
+	Return
+	------
+	:return: np.matrix with dimension (3, 3)
+		The 3D rotation matrix as a np.matrix object.
+	"""
+	rot = np.matrix(np.zeros(3, 3))
+	rot[0, 0] = w**2 + x**2 - y**2 - z**2
+	rot[0, 1] = 2*x*y - 2*w*z
+	rot[0, 2] = 2*x*z + 2*w*y
+	rot[1, 0] = 2*x*y + 2*w*z
+	rot[1, 1] = w**2 - x**2 + y**2 - z**2
+	rot[1, 2] = 2*y*z - 2*w*x
+	rot[2, 0] = 2*x*z - 2*w*y
+	rot[2, 1] = 2*y*z + 2*w*x
+	rot[2, 2] = w**2 - x**2 - y**2 + z**2
+
+	return rot
 
